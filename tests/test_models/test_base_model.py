@@ -82,6 +82,23 @@ class TestBaseModel(unittest.TestCase):
         self.base2.save()
         self.assertNotEqual(self.base2.updated_at, prev_timestamp)
 
+    def test_instance_change_updated_at(self) -> None:
+        """
+        Tests whether the `updated_at` attribute is updated when a change
+        occurs to the instance.
+        """
+        prev_updated_at = self.base1.updated_at
+        self.base1.name = "My New Class"
+
+        self.assertNotEqual(prev_updated_at, self.base1.updated_at)
+
+    def test_same_datetime_on_instantiation(self):
+        """
+        Tests for the same `created_at` and `updated_at` time values when an
+        instance is initialized for the first time.
+        """
+        self.assertEqual(self.base1.created_at, self.base1.updated_at)
+
     def test_iso_format(self) -> None:
         """Tests the ISO format after `to_dict()` is called."""
         expected_iso_format_1 = self.base2.updated_at.isoformat()
