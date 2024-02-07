@@ -8,6 +8,12 @@ files deserializes JSON files to instances.
 import json
 from typing import Any
 from models.base_model import BaseModel
+from models.user import User
+from models.amenity import Amenity
+from models.city import City
+from models.place import Place
+from models.state import State
+from models.review import Review
 
 
 class FileStorage:
@@ -17,6 +23,12 @@ class FileStorage:
     __objects = {}
     __models = {
         "BaseModel": BaseModel,
+        "User": User,
+        "State": State,
+        "City": City,
+        "Amenity": Amenity,
+        "Place": Place,
+        "Review": Review,
     }
 
     def all(self) -> dict:
@@ -38,9 +50,7 @@ class FileStorage:
         self.__objects[f"{obj.__class__.__name__}.{obj.id}"] = obj
 
     def reload(self) -> None:
-        """
-        Deserializes the json objects into their respective models.
-        """
+        """Deserializes the json objects into their respective models."""
         try:
             with open(self.__file_path, "r", encoding="utf-8") as json_file:
                 instances = json.load(json_file)
@@ -59,8 +69,8 @@ class FileStorage:
         """
         instances = {}
 
-        for key, value in self.__objects.items():
-            instances[key] = value.to_dict()
+        for class_id, obj in self.__objects.items():
+            instances[class_id] = obj.to_dict()
 
         try:
             with open(self.__file_path, "w", encoding="utf-8") as json_file:
