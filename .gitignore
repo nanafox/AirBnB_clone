@@ -5,3 +5,6 @@
 !.gitignore
 !README.md
 !AUTHORS
+
+# exclude driver test file
+*-*.py
