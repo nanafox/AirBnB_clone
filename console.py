@@ -331,6 +331,7 @@ class HBNBCommand(cmd.Cmd):
         if line:
             os.system(line)
 
+        return line
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
