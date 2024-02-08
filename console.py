@@ -65,7 +65,7 @@ class HBNBCommand(cmd.Cmd):
 
         return line
 
-    def postcmd(self, stop, line) -> None:
+    def postcmd(self, stop: bool, line: str) -> bool:
         if (
             line
             and shlex.split(line)[0] in ["help", "?"]
@@ -77,7 +77,7 @@ class HBNBCommand(cmd.Cmd):
 
     def is_valid_args(
         self, line, check_class=False, check_id=False, check_attributes=False
-    ) -> None:
+    ) -> bool:
         """
         Performs simple checks on the line received from the command line.
 
@@ -316,7 +316,7 @@ class HBNBCommand(cmd.Cmd):
         print(
             "Updates an instance based on the class name and id by adding or "
             "updating attributes.",
-            'update <class name> <id> <attribute name> "<attribute value>"',
+            'Usage: update <class name> <id> <attribute name> "<attribute value>"',
             sep="\n",
         )
 
