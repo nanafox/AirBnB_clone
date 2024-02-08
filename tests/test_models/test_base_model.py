@@ -220,4 +220,4 @@ class TestSaveMethod(unittest.TestCase):
 
             # ensure they are sub classes
             if obj.__class__.__name__ != "BaseModel":
-                self.assertTrue(issubclass(obj, BaseModel))
+                self.assertTrue(issubclass(obj.__class__, BaseModel))
