@@ -2,10 +2,12 @@
 
 """Tests the BaseModel class"""
 
+import os
 import unittest
 import inspect
-from models.base_model import BaseModel
 import datetime
+from models import storage
+from models.base_model import BaseModel
 
 
 class TestDocumentation(unittest.TestCase):
@@ -48,7 +50,7 @@ class TestBaseModel(unittest.TestCase):
     def test_str(self) -> None:
         """Tests the return value of the `__str__()` method."""
         self.assertEqual(
-            self.base1.__str__(),
+            str(self.base1),
             f"[BaseModel] ({self.base1.id}) {self.base1.__dict__}",
         )
 
@@ -58,7 +60,7 @@ class TestBaseModel(unittest.TestCase):
         self.base1.number = 25
 
         self.assertEqual(
-            self.base1.__str__(),
+            str(self.base1),
             f"[BaseModel] ({self.base1.id}) {self.base1.__dict__}",
         )
 
@@ -73,14 +75,6 @@ class TestBaseModel(unittest.TestCase):
     def test_type_id_str(self) -> None:
         """Tests to ensure the ID field is a string."""
         self.assertEqual(type(self.base1.id), str)
-
-    def test_save(self) -> None:
-        """Tests the `save()` method."""
-        prev_timestamp = self.base2.updated_at
-
-        # perform save operation - updates the 'updated_at' timestamp
-        self.base2.save()
-        self.assertNotEqual(self.base2.updated_at, prev_timestamp)
 
     def test_instance_change_updated_at(self) -> None:
         """
@@ -182,3 +176,48 @@ class TestBaseModel(unittest.TestCase):
         new_base = BaseModel(**self.base1.to_dict())
 
         self.assertEqual(type(new_base.created_at), datetime.datetime)
+
+
+class TestSaveMethod(unittest.TestCase):
+    """Tests the `save` method."""
+
+    __file_path = "file_storage.json"
+
+    def setUp(self) -> None:
+        self.base1 = BaseModel()
+        self.base2 = BaseModel()
+
+    def test_time_updated_on_save(self) -> None:
+        """Tests that the `updated_at` date and time are updated on save."""
+        prev_timestamp = self.base2.updated_at
+
+        # perform save operation - updates the 'updated_at' timestamp
+        self.base2.save()
+        self.assertNotEqual(self.base2.updated_at, prev_timestamp)
+
+    def test_file_created_on_save(self) -> None:
+        """Tests to ensure the JSON file is created on save."""
+        try:
+            # remove the previous files created
+            os.remove(self.__file_path)
+        except FileNotFoundError:
+            pass
+
+        self.base1.save()
+        self.assertTrue(os.path.exists(self.__file_path))
+
+    def test_read_saved_file_and_type(self) -> None:
+        """Tests the readability and type of the content in the JSON file."""
+        with open(self.__file_path, "r", encoding="utf-8") as json_file:
+            self.assertEqual(type(json_file.read()), str)
+
+    def test_objects_instance_of(self) -> None:
+        """Tests to ensure objects inherit from `BaseModel`."""
+        objects = storage.all()
+
+        for obj in objects.values():
+            self.assertTrue(isinstance(obj, BaseModel))
+
+            # ensure they are sub classes
+            if obj.__class__.__name__ != "BaseModel":
+                self.assertTrue(issubclass(obj, BaseModel))
