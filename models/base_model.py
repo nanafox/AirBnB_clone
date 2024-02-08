@@ -54,7 +54,10 @@ class BaseModel:
             self.__dict__[__name] = __value
 
     def save(self) -> None:
-        """Updates the `updated_at` timestamp with the current date & time."""
+        """
+        Updates the `updated_at` timestamp with the current date & time.
+        and saves the instance.
+        """
         self.updated_at = datetime.now()
 
         models.storage.save()
