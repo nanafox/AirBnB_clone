@@ -74,6 +74,6 @@ class FileStorage:
 
         try:
             with open(self.__file_path, "w", encoding="utf-8") as json_file:
-                json.dump(instances, json_file)
+                json.dump(instances, json_file, indent=4)
         except (FileNotFoundError, PermissionError):
             pass
