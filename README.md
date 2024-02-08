@@ -16,12 +16,10 @@ following:
 - Update attributes of an object
 - Destroy an object
 
-## [Authors](AUTHTORS)
+## [Authors](AUTHORS)
 
 - **Maxwell Nana Forson**
   - Socials
     - Twitter: [@_nanafox](https://twitter.com/_nanafox)
     - YouTube: [theLazyProgrammer👽](https://youtube.com/@thelazyprogrammer_)
     - GitHub: [nanafox](https://github.com/nanafox)
-- **Oriazowan Godfrey**
-  - Socials
