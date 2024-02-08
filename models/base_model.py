@@ -30,8 +30,7 @@ class BaseModel:
             models.storage.new(self)
 
     def __str__(self) -> str:
-        """
-        Returns the string representation for an instance of the Base Model.
+        """Returns the string representation for an instance of the Base Model.
 
         Returns:
             str: The string representation for an instance of the Base Model.
@@ -39,8 +38,7 @@ class BaseModel:
         return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
 
     def __setattr__(self, __name: str, __value: Any) -> None:
-        """
-        Handles the setting of attributes.
+        """Handles the setting of attributes.
 
         This method updates the `updated_at` attribute whenever a new attribute
         is added to the instance.
@@ -54,18 +52,14 @@ class BaseModel:
             self.__dict__[__name] = __value
 
     def save(self) -> None:
-        """
-        Updates the `updated_at` timestamp with the current date & time.
-        and saves the instance.
-        """
+        """Save the instance and updates the `updated_at`"""
         self.updated_at = datetime.now()
 
         models.storage.save()
 
     def to_dict(self) -> dict:
-        """
-        Returns the dictionary containing all the key/values of `__dict__` of
-        the instance.
+        """Returns the dictionary containing all the key/values of `__dict__`
+        of the instance.
 
         The `updated_at` and `created_at` instance attributes are converted to
         ISO format. A new key named `__class__` is added to the dictionary.
