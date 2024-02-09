@@ -33,24 +33,11 @@ class HBNBCommand(cmd.Cmd):
         "Review": Review,
     }
 
-    @staticmethod
-    def do_quit(_) -> bool:
-        """Quit command to exit the program."""
-        return True
-
-    do_exit = do_quit
-
-    @staticmethod
-    def do_eof(_) -> bool:
-        """Handles the Ctrl+D signal (EOF)."""
-        print()
-        return True
-
     def emptyline(self) -> None:
-        pass
+        """Ensures empty command lines are handled properly."""
 
     def __handle_model_based_cmd(self, line: str) -> str:
-        """Handles the model-based command syntax
+        """Handles the model-based command syntax.
 
         Args:
             line (str): The command line received.
@@ -95,6 +82,23 @@ class HBNBCommand(cmd.Cmd):
         return line
 
     def precmd(self, line) -> str:
+        """Modifies the command line received before it is interpreted.
+
+        The job of this method is three folds
+
+            - It performs a mini case-insensitivity for the 'EOF' string
+            when received on the command line.
+            - It aids in adding new lines before printing the help messages
+            for commands.
+            - It looks out for model-based command syntaxes (e.g. User.all()),
+            then calls the appropriate method to handle it.
+
+        Args:
+            line (str): The command line to modify
+
+        Returns:
+            str: The modified command if touched, else it returned as received.
+        """
         if line and line == "EOF":
             return line.lower()
 
@@ -115,6 +119,15 @@ class HBNBCommand(cmd.Cmd):
         return line
 
     def postcmd(self, stop: bool, line: str) -> bool:
+        """Adds a newline after the help message for commands.
+
+        Args:
+            stop (bool): Determines whether the console should keep running.
+            line (str): The command line received.
+
+        Returns:
+            bool: True if the console should exit, else False.
+        """
         if (
             line
             and shlex.split(line)[0] in ["help", "?"]
@@ -125,8 +138,7 @@ class HBNBCommand(cmd.Cmd):
         return stop
 
     def completedefault(self, *text) -> "list[str]":
-        """
-        Performs the name completion for model names.
+        """Performs the name completion for model names.
 
         Returns:
             list[str]: The list of model names.
@@ -143,8 +155,7 @@ class HBNBCommand(cmd.Cmd):
     def __is_valid_args(
         self, line, check_class=False, check_id=False, check_attributes=False
     ) -> bool:
-        """
-        Performs simple checks on the line received from the command line.
+        """Performs simple checks on the line received from the command line.
 
         This method checks for the presence of the class and id arguments in
         the `line`. Also, as an extra step, it checks to see if the class
@@ -203,26 +214,11 @@ class HBNBCommand(cmd.Cmd):
 
         return __is_valid_args_helper(args)
 
-    def do_count(self, model_name) -> None:
-        """Prints the number of instances for a particular model."""
-        if not self.__is_valid_args(model_name, check_class=True):
-            return
-
-        objects = storage.all()
-        instance_count = 0
-
-        for obj in objects.values():
-            if obj.__class__.__name__ == model_name:
-                instance_count += 1
-
-        print(instance_count)
-
     @staticmethod
     def __search_instance(
         instance_class: str, instance_id: str
     ) -> "object | None":
-        """
-        Searches for an instance by ID.
+        """Searches for an instance by it's id and class name.
 
         Args:
             instance_class (str): The name of instance's class.
@@ -243,6 +239,17 @@ class HBNBCommand(cmd.Cmd):
 
         return None
 
+    @staticmethod
+    def do_quit(_) -> bool:
+        """Quit command to exit the console."""
+        return True
+
+    @staticmethod
+    def do_eof(_) -> bool:
+        """Exits the console gracefully."""
+        print()
+        return True
+
     def do_create(self, line: str) -> None:
         """Creates a new instance of a model and saves it to a JSON file.
 
@@ -260,14 +267,16 @@ class HBNBCommand(cmd.Cmd):
     def help_create() -> None:
         """Prints the help info for the `create` command."""
         print(
-            "Creates an  instance of a model and saves it to a JSON file."
-            "Usage: create <class name>",
+            "Creates an  instance of a model and saves it to a JSON file.",
+            "Usage:",
+            "\tOption 1: create <class name>",
+            "\tOption 2: <class name>.create(<id>)",
             sep="\n",
         )
 
     def do_show(self, line) -> None:
         """Prints the string representation of an instance based on the class
-        name and id
+        name and id.
 
         Args:
             line (str): The command line argument received.
@@ -295,7 +304,9 @@ class HBNBCommand(cmd.Cmd):
         print(
             "Prints the string representation of an instance based on the "
             "class name and id",
-            "Usage: show <class name> <id> or <class name>.show(<id>)",
+            "Usage:",
+            "\tOption 1: show <class name> <id>",
+            "\tOption 2: <class name>.show(<id>)",
             sep="\n",
         )
 
@@ -323,6 +334,7 @@ class HBNBCommand(cmd.Cmd):
             # delete the current instance
             del objects[f"{instance.__class__.__name__}.{instance.id}"]
 
+            # save the updated objects dictionary
             storage.save()
         else:
             print("** no instance found **")
@@ -331,8 +343,10 @@ class HBNBCommand(cmd.Cmd):
     def help_destroy() -> None:
         """Prints the help info for the `show` command."""
         print(
-            "Deletes an instance base on the class name and id",
-            "Usage: destroy <class name> <id> or <class name>.destroy(<id>)",
+            "Deletes an instance based on the class name and id",
+            "Usage:",
+            "\tOption 1: destroy <class name> <id>",
+            "\tOption 2: <class name>.destroy(<id>)",
             sep="\n",
         )
 
@@ -363,7 +377,9 @@ class HBNBCommand(cmd.Cmd):
         print(
             "Prints the string representation for all or a specified model's "
             "instances.",
-            "Usage: all [<class name>] or <class name>.all()",
+            "Usage:",
+            "\tOption 1: all [<class name>]",
+            "\tOption 2: <class name>.all()",
             sep="\n",
         )
 
@@ -400,13 +416,38 @@ class HBNBCommand(cmd.Cmd):
         print(
             "Updates an instance based on the class name and id by adding or "
             "updating attributes.",
-            "Usage: ",
+            "Usage:",
             "\tOption 1: "
             'update <class name> <id> <attribute name> "<attribute value>"',
             "\tOption 2: "
             "<class name>.update(<id>, <attribute name>, <attribute value>)",
             "\tOption 3: "
             "<class name>.update(<id>, <dictionary representation>)",
+            sep="\n",
+        )
+
+    def do_count(self, model_name) -> None:
+        """Prints the number of instances for a particular model."""
+        if not self.__is_valid_args(model_name, check_class=True):
+            return
+
+        objects = storage.all()
+        instance_count = 0
+
+        for obj in objects.values():
+            if obj.__class__.__name__ == model_name:
+                instance_count += 1
+
+        print(instance_count)
+
+    @staticmethod
+    def help_count() -> None:
+        """Prints the help info for the `count` command."""
+        print(
+            "Prints the number of instances for a particular model.",
+            "Usage:",
+            "\tOption 1: count <class name>",
+            "\tOption 2: <class name>.count()",
             sep="\n",
         )
 
