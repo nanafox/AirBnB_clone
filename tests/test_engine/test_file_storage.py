@@ -20,8 +20,9 @@ from models.engine.file_storage import FileStorage
 from tests.test_models.test_base_model import JSON_FILE_PATH
 
 
-class TestDocumentation(unittest.TestCase):
-    """Tests the documentation for modules, classes and methods."""
+class TestFileStorageDocumentation(unittest.TestCase):
+    """Tests the documentation for modules, classes and methods for
+    FileStorage."""
 
     @classmethod
     def setUpClass(cls) -> None:

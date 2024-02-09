@@ -12,8 +12,9 @@ from models.base_model import BaseModel
 JSON_FILE_PATH = "file_storage.json"
 
 
-class TestDocumentation(unittest.TestCase):
-    """Tests the documentation for modules, classes and methods."""
+class TestEverythingBaseModelDocumentation(unittest.TestCase):
+    """Tests the documentation for modules, classes and methods for
+    BaseModel and anything else that inherits from it."""
 
     @classmethod
     def setUpClass(cls) -> None:
