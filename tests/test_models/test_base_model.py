@@ -9,6 +9,8 @@ import datetime
 from models import storage
 from models.base_model import BaseModel
 
+JSON_FILE_PATH = "file_storage.json"
+
 
 class TestDocumentation(unittest.TestCase):
     """Tests the documentation for modules, classes and methods."""
@@ -34,6 +36,20 @@ class TestDocumentation(unittest.TestCase):
 
 class TestBaseModel(unittest.TestCase):
     """Tests the Base Model class."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        try:
+            os.remove(JSON_FILE_PATH)
+        except FileNotFoundError:
+            pass
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        try:
+            os.remove(JSON_FILE_PATH)
+        except FileNotFoundError:
+            pass
 
     def setUp(self) -> None:
         self.base1 = BaseModel()
@@ -125,6 +141,28 @@ class TestBaseModel(unittest.TestCase):
 
         self.assertEqual(type(new_base).__name__, BaseModel.__name__)
 
+
+class TestInstantiationFromDict(unittest.TestCase):
+    """Tests the instantiation of BaseModels from a dictionary."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        try:
+            os.remove(JSON_FILE_PATH)
+        except FileNotFoundError:
+            pass
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        try:
+            os.remove(JSON_FILE_PATH)
+        except FileNotFoundError:
+            pass
+
+    def setUp(self) -> None:
+        self.base1 = BaseModel()
+        self.base2 = BaseModel()
+
     def test_invalid_iso_format_from_dict(self) -> None:
         """Handle invalid dates passed when instantiating with a dictionary."""
         base2_dict = self.base2.to_dict()
@@ -181,8 +219,6 @@ class TestBaseModel(unittest.TestCase):
 class TestSaveMethod(unittest.TestCase):
     """Tests the `save` method."""
 
-    __file_path = "file_storage.json"
-
     def setUp(self) -> None:
         self.base1 = BaseModel()
         self.base2 = BaseModel()
@@ -199,16 +235,16 @@ class TestSaveMethod(unittest.TestCase):
         """Tests to ensure the JSON file is created on save."""
         try:
             # remove the previous files created
-            os.remove(self.__file_path)
+            os.remove(JSON_FILE_PATH)
         except FileNotFoundError:
             pass
 
         self.base1.save()
-        self.assertTrue(os.path.exists(self.__file_path))
+        self.assertTrue(os.path.exists(JSON_FILE_PATH))
 
     def test_read_saved_file_and_type(self) -> None:
         """Tests the readability and type of the content in the JSON file."""
-        with open(self.__file_path, "r", encoding="utf-8") as json_file:
+        with open(JSON_FILE_PATH, "r", encoding="utf-8") as json_file:
             self.assertEqual(type(json_file.read()), str)
 
     def test_objects_instance_of(self) -> None:
