@@ -3,18 +3,18 @@
 """Implements the command interpreter."""
 
 import re
-import cmd
 import os
+import cmd
 import shlex
 from ast import literal_eval
 from models import storage
-from models.base_model import BaseModel
 from models.user import User
-from models.amenity import Amenity
 from models.city import City
 from models.place import Place
 from models.state import State
 from models.review import Review
+from models.amenity import Amenity
+from models.base_model import BaseModel
 
 
 class HBNBCommand(cmd.Cmd):
@@ -35,6 +35,24 @@ class HBNBCommand(cmd.Cmd):
 
     def emptyline(self) -> None:
         """Ensures empty command lines are handled properly."""
+
+    def default(self, line: str) -> None:
+        """Handles unknown commands and model-based commands.
+
+        It looks out for the model-based command syntaxes (e.g. User.all()),
+        then calls the appropriate method to handle it.
+
+        If the command `line` does not match a model-based syntax, then it is
+        ruled out an unknown command.
+
+        Args:
+            line (str): The command line received.
+        """
+        if re.match(r"(\w+)\.(\w+)\((.*)\)", line):
+            line = self.__handle_model_based_cmd(line)
+            self.onecmd(line)
+        else:
+            print(f"*** Unknown syntax: {line}")
 
     def __handle_model_based_cmd(self, line: str) -> str:
         """Handles the model-based command syntax.
@@ -84,14 +102,12 @@ class HBNBCommand(cmd.Cmd):
     def precmd(self, line) -> str:
         """Modifies the command line received before it is interpreted.
 
-        The job of this method is three folds
+        The job of this method is two folds
 
             - It performs a mini case-insensitivity for the 'EOF' string
             when received on the command line.
             - It aids in adding new lines before printing the help messages
             for commands.
-            - It looks out for model-based command syntaxes (e.g. User.all()),
-            then calls the appropriate method to handle it.
 
         Args:
             line (str): The command line to modify
@@ -112,9 +128,6 @@ class HBNBCommand(cmd.Cmd):
         except ValueError:
             self.onecmd(f"{line}")
             return ""
-
-        if re.match(r"(\w+)\.(\w+)\((.*)\)", line):
-            line = self.__handle_model_based_cmd(line)
 
         return line
 
