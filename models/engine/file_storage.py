@@ -55,25 +55,24 @@ class FileStorage:
             with open(self.__file_path, "r", encoding="utf-8") as json_file:
                 instances = json.load(json_file)
 
-                for class_id, json_dict in instances.items():
-                    obj_class = json_dict["__class__"]
-                    self.__objects[class_id] = self.__models[obj_class](
+                for class_name_id, json_dict in instances.items():
+                    model_name = json_dict["__class__"]
+                    self.__objects[class_name_id] = self.__models[model_name](
                         **json_dict
                     )
         except (FileNotFoundError, PermissionError):
             pass
 
     def save(self) -> None:
-        """
-        Saves the contents of the dictionary containing the serialized objects.
-        """
+        """Serializes the objects dictionary and save it to a JSON file."""
         instances = {}
 
         for class_id, obj in self.__objects.items():
+            # ensure valid keys
+            if class_id != f"{obj.__class__.__name__}.{obj.id}":
+                raise KeyError("invalid key. key must be <class name>.<id>")
+
             instances[class_id] = obj.to_dict()
 
-        try:
-            with open(self.__file_path, "w", encoding="utf-8") as json_file:
-                json.dump(instances, json_file, indent=4)
-        except (FileNotFoundError, PermissionError):
-            pass
+        with open(self.__file_path, "w", encoding="utf-8") as json_file:
+            json.dump(instances, json_file, indent=4)
