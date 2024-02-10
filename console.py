@@ -72,7 +72,7 @@ class HBNBCommand(cmd.Cmd):
         if get_regex:
             if len(get_regex) >= 2:
                 class_name, user_cmd = get_regex[0], get_regex[1]
-                line = f"{user_cmd} {class_name} "
+                line = f"{user_cmd} {class_name}"
 
                 try:
                     if user_cmd == "update" and re.findall(
@@ -92,8 +92,19 @@ class HBNBCommand(cmd.Cmd):
                         line = ""
                     else:
                         # pass the rest of the arguments as is
+                        line += " "
+
+                        # try and preserve a list if it exists
+                        list_data = re.findall(r"\[.*\]", get_regex[2])[0]
+                        if list_data:
+                            # print(data)
+                            get_regex[2] = get_regex[2].replace(
+                                str(list_data), ""
+                            )
+
                         extra_args = shlex.split(get_regex[2])
                         line += " ".join(extra_args).replace(",", "")
+                        line += f" {list_data or ''}"
                 except IndexError:
                     pass
 
@@ -413,12 +424,23 @@ class HBNBCommand(cmd.Cmd):
             return
 
         # grab the four expected arguments, all other arguments are ignored
-        instance_class, instance_id, attr_name, attr_val = shlex.split(arg)[:4]
+        instance_class, instance_id, attr_name = shlex.split(arg)[:3]
 
         instance = self.__search_instance(instance_class, instance_id)
 
         if instance:
-            instance.__dict__[attr_name] = attr_val
+            if re.findall(r"\[.*\]", arg):
+                attr_val = re.findall(r"\[.*\]", arg)[0]
+            else:
+                attr_val = shlex.split(arg)[3]
+
+            try:
+                # setting the value based on its default builtin type
+                instance.__dict__[attr_name] = literal_eval(attr_val)
+            except (ValueError, SyntaxError):
+                # well, looks like we'd have to save it as it was received
+                instance.__dict__[attr_name] = attr_val
+
             instance.save()
         else:
             print(" ** no instance found **")
