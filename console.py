@@ -95,11 +95,10 @@ class HBNBCommand(cmd.Cmd):
                         line += " "
 
                         # try and preserve a list if it exists
-                        list_data = re.findall(r"\[.*\]", get_regex[2])[0]
+                        list_data = re.findall(r"\[.*\]", get_regex[2])
                         if list_data:
-                            # print(data)
                             get_regex[2] = get_regex[2].replace(
-                                str(list_data), ""
+                                str(list_data[0]), ""
                             )
 
                         extra_args = shlex.split(get_regex[2])
@@ -108,7 +107,7 @@ class HBNBCommand(cmd.Cmd):
                 except IndexError:
                     pass
 
-        return line
+        return line.strip()
 
     def precmd(self, line) -> str:
         """Modifies the command line received before it is interpreted.
