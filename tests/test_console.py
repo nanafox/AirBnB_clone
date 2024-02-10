@@ -91,8 +91,8 @@ class TestHelpCommand(TestCase):
         """Tests the `help` command with no args"""
         self.__expected_output = (
             "\n"
-            "hbnb console commands (type help <command>)\n"
-            "+++++++++++++++++++++++++++++++++++++++++++\n"
+            "Documented commands (type help <topic>):\n"
+            "========================================\n"
             "all  clear  count  create  destroy  eof  "
             "help  quit  shell  show  update\n"
             "\n"

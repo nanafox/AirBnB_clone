@@ -21,8 +21,6 @@ class HBNBCommand(cmd.Cmd):
     """Defines the command interpreter."""
 
     prompt = "(hbnb) "
-    doc_header = "hbnb console commands (type help <command>)"
-    ruler = "+"
     __models = {
         "BaseModel": BaseModel,
         "User": User,
@@ -50,9 +48,9 @@ class HBNBCommand(cmd.Cmd):
         """
         if re.match(r"(\w+)\.(\w+)\((.*)\)", line):
             line = self.__handle_model_based_cmd(line)
-            self.onecmd(line)
+            self.onecmd(line.strip())
         else:
-            print(f"*** Unknown syntax: {line}")
+            print(f"*** Unknown syntax: {line.strip()}")
 
     def __handle_model_based_cmd(self, line: str) -> str:
         """Handles the model-based command syntax.
