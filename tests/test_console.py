@@ -12,6 +12,9 @@ from unittest.mock import patch
 from console import HBNBCommand as hbnb
 from tests.test_models.test_base_model import JSON_FILE_PATH
 import models
+from lazy_methods import LazyMethods
+
+instance = LazyMethods()
 
 
 known_models = [
@@ -284,8 +287,7 @@ class TestCreateCommand(TestCase):
                 hbnb().onecmd(f"create {model}")
 
             # grab the string ID and convert it to a valid UUID for checking
-            instance_id = result.getvalue().strip()
-            instance_id = uuid(instance_id)
+            instance_id = instance.get_uuid(result)
 
             # ensure the id is valid
             self.assertTrue(isinstance(instance_id, uuid))
@@ -293,7 +295,7 @@ class TestCreateCommand(TestCase):
             with patch("sys.stdout", new=StringIO()) as result:
                 hbnb().onecmd(f"count {model}")
 
-            num_of_instances = int(result.getvalue().strip())
+            num_of_instances = instance.get_instances_count(result)
 
             # the number of instance must be 1 at this point
             self.assertEqual(num_of_instances, 1)
@@ -331,7 +333,7 @@ class TestCreateCommand(TestCase):
                 hbnb().onecmd(f"create {model}")
 
             # grab the string ID and convert it to a valid UUID for checking
-            instance_id_1 = uuid(result.getvalue().strip())
+            instance_id_1 = instance.get_uuid(result)
 
             # ensure the id is valid for the first instance
             self.assertTrue(isinstance(instance_id_1, uuid))
@@ -340,7 +342,7 @@ class TestCreateCommand(TestCase):
                 hbnb().onecmd(f"create {model}")
 
             # grab the string ID and convert it to a valid UUID for checking
-            instance_id_2 = uuid(result.getvalue().strip())
+            instance_id_2 = instance.get_uuid(result)
 
             # ensure the id is valid for second instance
             self.assertTrue(isinstance(instance_id_2, uuid))
@@ -456,7 +458,7 @@ class TestCreateCommand(TestCase):
                 hbnb().onecmd(f"{model}.create()")
 
             # grab the string ID and convert it to a valid UUID for checking
-            instance_id_1 = uuid(result.getvalue().strip())
+            instance_id_1 = instance.get_uuid(result)
 
             # ensure the id is valid for the first instance
             self.assertTrue(isinstance(instance_id_1, uuid))
@@ -465,7 +467,7 @@ class TestCreateCommand(TestCase):
                 hbnb().onecmd(f"{model}.create()")
 
             # grab the string ID and convert it to a valid UUID for checking
-            instance_id_2 = uuid(result.getvalue().strip())
+            instance_id_2 = instance.get_uuid(result)
 
             # ensure the id is valid for second instance
             self.assertTrue(isinstance(instance_id_2, uuid))
@@ -491,6 +493,54 @@ class TestShowCommand(TestCase):
 
 class TestUpdateCommand(TestCase):
     """Tests the `update` command on all models."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        try:
+            os.remove(JSON_FILE_PATH)
+        except FileNotFoundError:
+            pass
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        try:
+            os.remove(JSON_FILE_PATH)
+        except FileNotFoundError:
+            pass
+
+    def setUp(self) -> None:
+        models.storage.all().clear()
+
+    ##########################################################
+    # The following test cases tests the `update` command.   #
+    # It uses general syntax: update <class name> <id>       #
+    # It will also test for edge cases and potential errors  #
+    # while using the create command on the all known Models #
+    ##########################################################
+
+    def test_create_update_one_attribute(self) -> None:
+        """Creates an instance of each model, updates it with one attribute,
+        then checks that it happened."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"create {model}")
+
+            instance_id = instance.get_uuid(result)
+            instance_key = instance.get_key(model, instance_id)
+            attr_name, attr_value = instance.get_random_attribute()
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(
+                    f"update {model} {instance_id} {attr_name} {attr_value}"
+                )
+
+            # the `update` command prints nothing on success, confirm that
+            self.assertEqual(result.getvalue().strip(), "")
+
+            # now let's confirm that the instance really got updated
+            self.assertIn(
+                attr_name, models.storage.all()[instance_key].to_dict()
+            )
 
 
 class TestAllCommand(TestCase):
