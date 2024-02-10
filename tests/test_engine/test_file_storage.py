@@ -118,10 +118,15 @@ class TestFileStorageNewMethod(unittest.TestCase):
     def test_new_base_model(self) -> None:
         """Tests the `new()` method with a single BaseModel instance object."""
         base = BaseModel()
+
+        # remove all objects from the dictionary
+        storage.all().clear()
+
+        # capture this new instance
         storage.new(base)
 
-        # check to ensure it made it to the dictionary
-        self.assertDictContainsSubset(
+        # check to ensure it made it to the dictionary and it's the only object
+        self.assertDictEqual(
             {f"{base.__class__.__name__}.{base.id}": base}, storage.all()
         )
 
