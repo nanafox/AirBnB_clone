@@ -63,3 +63,11 @@ class TestCityModel(unittest.TestCase):
         self.assertTrue(issubclass(self.city1.__class__, BaseModel))
         self.assertTrue(issubclass(self.city2.__class__, BaseModel))
         self.assertTrue(issubclass(City, BaseModel))
+
+    def test_nonexistent_attribute(self) -> None:
+        """Tests for non-existent attribute."""
+        self.assertFalse(hasattr(self.city1, "city_id"))
+
+    def test_nonexistent_method(self) -> None:
+        """Tests for non-existent method."""
+        self.assertFalse(hasattr(self.city1, "get_city()"))

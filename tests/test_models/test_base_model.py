@@ -76,6 +76,9 @@ class TestBaseModel(unittest.TestCase):
         self.base1.name = "Test Name"
         self.base1.number = 25
 
+        self.assertEqual(self.base1.name, "Test Name")
+        self.assertEqual(self.base1.number, 25)
+
         self.assertEqual(
             str(self.base1),
             f"[BaseModel] ({self.base1.id}) {self.base1.__dict__}",
@@ -121,26 +124,29 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(base2_dict["updated_at"], expected_iso_format_1)
         self.assertEqual(base2_dict["created_at"], expected_iso_format_2)
 
-    def test_class_name_in_to_dict(self) -> None:
-        """Tests if the class name was added to the dictionary returned."""
-        base1_dict = self.base1.to_dict()
+    def test_nonexistent_attribute(self) -> None:
+        """Tests for non-existent attribute"""
+        self.assertFalse(hasattr(self.base1, "invalid_id"))
 
-        # confirm the key `__class__` is present
-        self.assertIn("__class__", base1_dict)
+    def test_nonexistent_method(self) -> None:
+        """Tests for non-existent method"""
+        self.assertFalse(hasattr(self.base1, "get_base()"))
 
-        # confirm the value is as expected
-        self.assertIn("BaseModel", base1_dict.values())
+    def test_update_to_datetime_year(self) -> None:
+        """Tests an attempt to modify the year for an instance was created."""
+        with self.assertRaisesRegex(AttributeError, "objects is not writable"):
+            self.base1.created_at.year = 2025
+            self.base2.created_at.year = 2025
 
-    def test_to_dict_return_type(self) -> None:
-        """Ensures the return value of the `to_dict()` is a dictionary."""
-        self.assertEqual(type(self.base1.to_dict()), dict)
-        self.assertEqual(type(self.base2.to_dict()), dict)
+    def test_update_to_datetime_month(self) -> None:
+        """Tests an attempt to modify the month for an instance was created."""
+        with self.assertRaisesRegex(AttributeError, "objects is not writable"):
+            self.base1.updated_at.month = 5
 
-    def test_instantiation_from_dict(self) -> None:
-        """Tests object instantiation from a dictionary."""
-        new_base = BaseModel(**self.base1.to_dict())
-
-        self.assertEqual(type(new_base).__name__, BaseModel.__name__)
+    def test_update_to_datetime_day(self) -> None:
+        """Tests an attempt to modify the day for an instance was created."""
+        with self.assertRaisesRegex(AttributeError, "objects is not writable"):
+            self.base1.updated_at.day = 24
 
 
 class TestInstantiationFromDict(unittest.TestCase):
@@ -181,8 +187,7 @@ class TestInstantiationFromDict(unittest.TestCase):
         self.assertEqual(new_base.id, self.base2.id)
 
     def test_same_creation_datetime_from_dict(self) -> None:
-        """
-        Tests for the same creation dates when instantiated from
+        """Tests for the same creation dates when instantiated from
         a dictionary.
         """
         new_base = BaseModel(**self.base1.to_dict())
@@ -190,8 +195,7 @@ class TestInstantiationFromDict(unittest.TestCase):
         self.assertEqual(self.base1.created_at, new_base.created_at)
 
     def test_same_updated_datetime_from_dict(self) -> None:
-        """
-        Tests for the same `updated_at` dates when instantiated from
+        """Tests for the same `updated_at` dates when instantiated from
         a dictionary.
         """
         new_base = BaseModel(**self.base1.to_dict())
@@ -199,8 +203,7 @@ class TestInstantiationFromDict(unittest.TestCase):
         self.assertEqual(new_base.updated_at, self.base1.updated_at)
 
     def test_updated_at_type_from_dict(self) -> None:
-        """
-        Tests the data type of the `updated_at` instance attribute
+        """Tests the data type of the `updated_at` instance attribute
         after instantiating from a dictionary.
         """
         new_base = BaseModel(**self.base1.to_dict())
@@ -208,13 +211,44 @@ class TestInstantiationFromDict(unittest.TestCase):
         self.assertEqual(type(new_base.updated_at), datetime.datetime)
 
     def test_created_at_type_from_dict(self) -> None:
-        """
-        Tests the data type of the `created_at` instance attribute
+        """Tests the data type of the `created_at` instance attribute
         after instantiating from a dictionary.
         """
         new_base = BaseModel(**self.base1.to_dict())
 
         self.assertEqual(type(new_base.created_at), datetime.datetime)
+
+    def test_arg_passed_to_dict(self) -> None:
+        """Tests passing an argument to the `to_dict()` method.
+        Expects TypeError."""
+        with self.assertRaises(TypeError):
+            self.base1.to_dict(self.base1)
+
+    def test_isoformat_string_date(self) -> None:
+        """Tests to ensure ISO dates are strings in the dictionary"""
+        self.assertIsInstance(self.base1.to_dict()["updated_at"], str)
+        self.assertIsInstance(self.base1.to_dict()["created_at"], str)
+
+    def test_class_name_in_to_dict(self) -> None:
+        """Tests if the class name was added to the dictionary returned."""
+        base1_dict = self.base1.to_dict()
+
+        # confirm the key `__class__` is present
+        self.assertIn("__class__", base1_dict)
+
+        # confirm the value is as expected
+        self.assertIn("BaseModel", base1_dict.values())
+
+    def test_to_dict_return_type(self) -> None:
+        """Ensures the return value of the `to_dict()` is a dictionary."""
+        self.assertEqual(type(self.base1.to_dict()), dict)
+        self.assertEqual(type(self.base2.to_dict()), dict)
+
+    def test_instantiation_from_dict(self) -> None:
+        """Tests object instantiation from a dictionary."""
+        new_base = BaseModel(**self.base1.to_dict())
+
+        self.assertEqual(type(new_base).__name__, BaseModel.__name__)
 
 
 class TestSaveMethod(unittest.TestCase):
@@ -258,3 +292,8 @@ class TestSaveMethod(unittest.TestCase):
             # ensure they are sub classes
             if obj.__class__.__name__ != "BaseModel":
                 self.assertTrue(issubclass(obj.__class__, BaseModel))
+
+    def test_arg_passed_to_save(self) -> None:
+        """Tests passing an argument to the save method. Expects TypeError."""
+        with self.assertRaises(TypeError):
+            self.base1.save(self.base1)

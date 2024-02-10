@@ -36,13 +36,13 @@ class TestAmenityModel(unittest.TestCase):
 
     def test_save(self) -> None:
         """Tests the inherited `save()` method."""
-        Amenity().save()
+        self.amenity1.save()
 
         self.assertTrue(os.path.exists(JSON_FILE_PATH))
 
     def test_unique_objects(self) -> None:
         """Tests to ensure no two instances are the same."""
-        self.assertNotEqual(self.amenity1, self.amenity2)
+        self.assertIsNot(self.amenity1, self.amenity2)
 
     def test_default_class_attribute_values(self) -> None:
         """Tests the default values for the public class attributes."""
@@ -58,3 +58,11 @@ class TestAmenityModel(unittest.TestCase):
         self.assertTrue(issubclass(self.amenity1.__class__, BaseModel))
         self.assertTrue(issubclass(self.amenity2.__class__, BaseModel))
         self.assertTrue(issubclass(Amenity, BaseModel))
+
+    def test_nonexistent_attribute(self) -> None:
+        """Tests for non-existent attribute."""
+        self.assertFalse(hasattr(self.amenity1, "amenity_id"))
+
+    def test_nonexistent_method(self) -> None:
+        """Tests for non-existent method."""
+        self.assertFalse(hasattr(self.amenity1, "get_amenity()"))

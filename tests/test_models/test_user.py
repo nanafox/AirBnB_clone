@@ -68,3 +68,11 @@ class TestUserModel(unittest.TestCase):
         self.assertTrue(issubclass(self.user1.__class__, BaseModel))
         self.assertTrue(issubclass(self.user2.__class__, BaseModel))
         self.assertTrue(issubclass(User, BaseModel))
+
+    def test_nonexistent_attribute(self) -> None:
+        """Tests for non-existent attribute."""
+        self.assertFalse(hasattr(self.user1, "user_id"))
+
+    def test_nonexistent_method(self) -> None:
+        """Tests for non-existent method."""
+        self.assertFalse(hasattr(self.user2, "get_user_id()"))

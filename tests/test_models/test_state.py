@@ -36,7 +36,7 @@ class TestStateModel(unittest.TestCase):
 
     def test_save(self) -> None:
         """Tests the inherited `save()` method."""
-        State().save()
+        self.state1.save()
 
         self.assertTrue(os.path.exists(JSON_FILE_PATH))
 
@@ -58,3 +58,11 @@ class TestStateModel(unittest.TestCase):
         self.assertTrue(issubclass(self.state1.__class__, BaseModel))
         self.assertTrue(issubclass(self.state2.__class__, BaseModel))
         self.assertTrue(issubclass(State, BaseModel))
+
+    def test_nonexistent_attribute(self) -> None:
+        """Tests for non-existent attribute."""
+        self.assertFalse(hasattr(self.state1, "state_id"))
+
+    def test_nonexistent_method(self) -> None:
+        """Tests for non-existent method."""
+        self.assertFalse(hasattr(self.state1, "get_state()"))

@@ -68,3 +68,11 @@ class TestReviewModel(unittest.TestCase):
         self.assertTrue(issubclass(self.review1.__class__, BaseModel))
         self.assertTrue(issubclass(self.review2.__class__, BaseModel))
         self.assertTrue(issubclass(Review, BaseModel))
+
+    def test_nonexistent_attribute(self) -> None:
+        """Tests for non-existent attribute."""
+        self.assertFalse(hasattr(self.review1, "node_string"))
+
+    def test_nonexistent_method(self) -> None:
+        """Tests for non-existent method."""
+        self.assertFalse(hasattr(self.review1, "op_review()"))

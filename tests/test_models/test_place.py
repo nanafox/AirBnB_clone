@@ -85,3 +85,11 @@ class TestPlaceModel(unittest.TestCase):
         self.assertTrue(issubclass(self.place1.__class__, BaseModel))
         self.assertTrue(issubclass(self.place2.__class__, BaseModel))
         self.assertTrue(issubclass(Place, BaseModel))
+
+    def test_nonexistent_attribute(self) -> None:
+        """Tests for non-existent attribute."""
+        self.assertFalse(hasattr(self.place1, "no_attribute"))
+
+    def test_nonexistent_method(self) -> None:
+        """Tests for non-existent method."""
+        self.assertFalse(hasattr(self.place1, "get_place()"))
