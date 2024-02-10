@@ -3,11 +3,26 @@
 """This module tests the console program `HBNBCommand`."""
 
 
+import os
 import inspect
 from io import StringIO
+from uuid import UUID as uuid
 from unittest import TestCase
 from unittest.mock import patch
 from console import HBNBCommand as hbnb
+from tests.test_models.test_base_model import JSON_FILE_PATH
+import models
+
+
+known_models = [
+    "User",
+    "BaseModel",
+    "Amenity",
+    "Place",
+    "City",
+    "Review",
+    "State",
+]
 
 
 class TestHBNBCommandDocumentation(TestCase):
@@ -79,6 +94,7 @@ class TestHelpCommand(TestCase):
             "help  quit  shell  show  update\n"
             "\n"
         )
+
         with patch("sys.stdout", new=StringIO()) as result:
             hbnb().onecmd("help")
 
@@ -230,3 +246,260 @@ class TestHelpCommand(TestCase):
             hbnb().onecmd("help update")
 
         self.assertEqual(result.getvalue(), self.__expected_output)
+
+
+class TestCreateCommand(TestCase):
+    """Tests the `create` command on the all known models."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        try:
+            os.remove(JSON_FILE_PATH)
+        except FileNotFoundError:
+            pass
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        try:
+            os.remove(JSON_FILE_PATH)
+        except FileNotFoundError:
+            pass
+
+    def setUp(self) -> None:
+        models.storage.all().clear()
+
+    ##########################################################
+    # The following test cases tests the `create` command.   #
+    # It uses general syntax: create <class name>.           #
+    # It will also test for edge cases and potential errors  #
+    # while using the create command on the all known Models #
+    ##########################################################
+
+    def test_general_cmd_create_instance_valid(self) -> None:
+        """Tests the creation of a valid model instance."""
+        for model in known_models:
+            models.storage.all().clear()
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"create {model}")
+
+            # grab the string ID and convert it to a valid UUID for checking
+            instance_id = result.getvalue().strip()
+            instance_id = uuid(instance_id)
+
+            # ensure the id is valid
+            self.assertTrue(isinstance(instance_id, uuid))
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"count {model}")
+
+            num_of_instances = int(result.getvalue().strip())
+
+            # the number of instance must be 1 at this point
+            self.assertEqual(num_of_instances, 1)
+
+    def test_general_cmd_create_instance_no_class(self) -> None:
+        """Tests the creation of an instance without the model name."""
+        with patch("sys.stdout", new=StringIO()) as error:
+            hbnb().onecmd("create")
+
+        self.assertEqual(error.getvalue().strip(), "** class name missing **")
+
+    def test_general_cmd_create_instance_invalid_class(self) -> None:
+        """Tests the creation of an instance with a wrong model name"""
+        with patch("sys.stdout", new=StringIO()) as error:
+            hbnb().onecmd("create MyModel")
+
+        self.assertEqual(error.getvalue().strip(), "** class doesn't exist **")
+
+    def test_general_cmd_create_instance_lowercase_class(self) -> None:
+        """Tests the creation of a instance with class name in lowercase."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as error:
+                hbnb().onecmd(f"create {model.lower()}")
+
+            self.assertEqual(
+                error.getvalue().strip(), "** class doesn't exist **"
+            )
+
+    def test_general_cmd_create_multi_and_file(self) -> None:
+        """Tests the creation of multiple instances and save operation."""
+        for model in known_models:
+            models.storage.all().clear()
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"create {model}")
+
+            # grab the string ID and convert it to a valid UUID for checking
+            instance_id_1 = uuid(result.getvalue().strip())
+
+            # ensure the id is valid for the first instance
+            self.assertTrue(isinstance(instance_id_1, uuid))
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"create {model}")
+
+            # grab the string ID and convert it to a valid UUID for checking
+            instance_id_2 = uuid(result.getvalue().strip())
+
+            # ensure the id is valid for second instance
+            self.assertTrue(isinstance(instance_id_2, uuid))
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"count {model}")
+
+            num_of_instances = int(result.getvalue().strip())
+
+            # the number of instance must be 2 at this point
+            self.assertEqual(num_of_instances, 2)
+
+            # ensure objects dictionary is not empty after instance creation
+            self.assertNotEqual(models.storage.all(), {})
+
+            # ensure the JSON file was created
+            self.assertTrue(os.path.exists(JSON_FILE_PATH))
+
+    ##########################################################
+    # The following test cases tests the `create` command.   #
+    # It uses model-based syntax: <class name>.<command>().  #
+    # It will also test for edge cases and potential errors  #
+    # while using the create command on the all known Models #
+    ##########################################################
+
+    def test_model_based_cmd_create_instance_valid(self) -> None:
+        """Tests the creation of a valid instance."""
+        for model in known_models:
+            models.storage.all().clear()
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"{model}.create()")
+
+            # grab the string ID and convert it to a valid UUID for checking
+            instance_id = result.getvalue().strip()
+            instance_id = uuid(instance_id)
+
+            # ensure the id is valid
+            self.assertTrue(isinstance(instance_id, uuid))
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"{model}.count()")
+
+            num_of_instances = int(result.getvalue().strip())
+
+            # the number of instance must be 1 at this point
+            self.assertEqual(num_of_instances, 1)
+
+    def test_model_based_cmd_create_instance_incomplete(self) -> None:
+        """Tests the creation of a instance with an incomplete command."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as error:
+                hbnb().onecmd(f"{model}")
+
+            self.assertEqual(
+                error.getvalue().strip(), f"*** Unknown syntax: {model}"
+            )
+
+    def test_model_based_cmd_create_instance_incomplete_2(self) -> None:
+        """Tests the creation of a instance with an incomplete command."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as error:
+                hbnb().onecmd(f"{model}.")
+
+            self.assertEqual(
+                error.getvalue().strip(), f"*** Unknown syntax: {model}."
+            )
+
+    def test_model_based_cmd_create_instance_incomplete_3(self) -> None:
+        """Tests the creation of a instance with an incomplete command."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as error:
+                hbnb().onecmd(f"{model}.create")
+
+            self.assertEqual(
+                error.getvalue().strip(), f"*** Unknown syntax: {model}.create"
+            )
+
+    def test_model_based_cmd_create_instance_incomplete_4(self) -> None:
+        """Tests the creation of a instance with an incomplete command."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"{model}.create(")
+
+            self.assertEqual(
+                result.getvalue().strip(),
+                f"*** Unknown syntax: {model}.create(",
+            )
+
+    def test_model_based_cmd_create_instance_invalid_class(self) -> None:
+        """Tests the creation of a instance with a wrong class name"""
+        with patch("sys.stdout", new=StringIO()) as error:
+            hbnb().onecmd("MyModel.create()")
+
+        self.assertEqual(error.getvalue().strip(), "** class doesn't exist **")
+
+    def test_model_based_cmd_create_instance_lowercase_class(self) -> None:
+        """Tests the creation of a instance with class name in lowercase."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as error:
+                hbnb().onecmd(f"{model.lower()}.create()")
+
+            self.assertEqual(
+                error.getvalue().strip(), "** class doesn't exist **"
+            )
+
+    def test_model_based_cmd_create_multi_and_file(self) -> None:
+        """Tests the creation of multiple User instances and save operation."""
+        for model in known_models:
+            models.storage.all().clear()
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"{model}.create()")
+
+            # grab the string ID and convert it to a valid UUID for checking
+            instance_id_1 = uuid(result.getvalue().strip())
+
+            # ensure the id is valid for the first instance
+            self.assertTrue(isinstance(instance_id_1, uuid))
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"{model}.create()")
+
+            # grab the string ID and convert it to a valid UUID for checking
+            instance_id_2 = uuid(result.getvalue().strip())
+
+            # ensure the id is valid for second instance
+            self.assertTrue(isinstance(instance_id_2, uuid))
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"{model}.count()")
+
+            num_of_instances = int(result.getvalue().strip())
+
+            # the number of instance must be 2 at this point
+            self.assertEqual(num_of_instances, 2)
+
+            # ensure objects dictionary is not empty after instance creation
+            self.assertNotEqual(models.storage.all(), {})
+
+            # ensure the JSON file was created
+            self.assertTrue(os.path.exists(JSON_FILE_PATH))
+
+
+class TestShowCommand(TestCase):
+    """Tests the `show` command on all models."""
+
+
+class TestUpdateCommand(TestCase):
+    """Tests the `update` command on all models."""
+
+
+class TestAllCommand(TestCase):
+    """Tests the `all` command on all models."""
+
+
+class TestDestroyCommand(TestCase):
+    """Tests the `destroy` command on all models."""
+
+
+class TestCountCommand(TestCase):
+    """Tests the `count` command on all models."""
