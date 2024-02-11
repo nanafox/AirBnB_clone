@@ -291,7 +291,7 @@ class HBNBCommand(cmd.Cmd):
             "Creates an  instance of a model and saves it to a JSON file.",
             "Usage:",
             "\tOption 1: create <class name>",
-            "\tOption 2: <class name>.create(<id>)",
+            "\tOption 2: <class name>.create()",
             sep="\n",
         )
 

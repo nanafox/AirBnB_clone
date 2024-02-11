@@ -153,7 +153,7 @@ class TestHelpCommand(TestCase):
             "Creates an  instance of a model and saves it to a JSON file.\n"
             "Usage:\n"
             "\tOption 1: create <class name>\n"
-            "\tOption 2: <class name>.create(<id>)\n"
+            "\tOption 2: <class name>.create()\n"
         )
 
         with patch("sys.stdout", new=StringIO()) as result:
