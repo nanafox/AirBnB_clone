@@ -63,9 +63,7 @@ class TestFileStorageAllMethod(unittest.TestCase):
 
     def test_all_method_return_type(self) -> None:
         """Tests the return type of the `all()` method."""
-        objects = storage.all()
-
-        self.assertTrue(isinstance(objects, dict))
+        self.assertTrue(isinstance(storage.all(), dict))
 
     def test_key_name_in_objects_dict_one_object(self) -> None:
         """Tests to ensure key names are correct for a single object."""
@@ -81,13 +79,11 @@ class TestFileStorageAllMethod(unittest.TestCase):
         base1 = BaseModel()
         base2 = BaseModel()
 
-        objects = storage.all()
-
         expected_key_1 = f"{base1.__class__.__name__}.{base1.id}"
         expected_key_2 = f"{base2.__class__.__name__}.{base2.id}"
 
         self.assertDictEqual(
-            {expected_key_1: base1, expected_key_2: base2}, objects
+            {expected_key_1: base1, expected_key_2: base2}, storage.all()
         )
 
     def test_key_name_in_objects_dict_diff_two_objects(self) -> None:
@@ -95,13 +91,11 @@ class TestFileStorageAllMethod(unittest.TestCase):
         base = BaseModel()
         city = City()
 
-        objects = storage.all()
-
         expected_key_1 = f"{base.__class__.__name__}.{base.id}"
         expected_key_2 = f"{city.__class__.__name__}.{city.id}"
 
         self.assertDictEqual(
-            {expected_key_1: base, expected_key_2: city}, objects
+            {expected_key_1: base, expected_key_2: city}, storage.all()
         )
 
 
@@ -129,6 +123,11 @@ class TestFileStorageNewMethod(unittest.TestCase):
         self.assertDictEqual(
             {f"{base.__class__.__name__}.{base.id}": base}, storage.all()
         )
+
+    def test_many_args_passed_to_new(self) -> None:
+        """Tests passing too many arguments to the `new()` method."""
+        with self.assertRaises(TypeError):
+            storage.new(BaseModel(), City())
 
 
 class TestFileStorageSaveMethod(unittest.TestCase):
