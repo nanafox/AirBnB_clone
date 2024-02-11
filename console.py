@@ -366,7 +366,7 @@ class HBNBCommand(cmd.Cmd):
     def do_all(self, model_name: str) -> None:
         """Prints the string representation for all or some model instances."""
         if model_name and shlex.split(model_name)[0] not in self.__models:
-            print("** class doesn't exist")
+            print("** class doesn't exist **")
             return
 
         objects = storage.all()
