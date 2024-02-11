@@ -73,36 +73,33 @@ class HBNBCommand(cmd.Cmd):
                 line = f"{user_cmd} {class_name}"
 
                 try:
-                    if user_cmd == "update" and re.findall(
-                        r"\{.*?\}", get_regex[2]
-                    ):
-                        obj_dict = re.findall(r"\{.*?\}", get_regex[2])[0]
+                    obj_dict = re.findall(r"\{.*?\}", get_regex[2])[0]
+
+                    if user_cmd == "update" and obj_dict:
 
                         obj_dict = literal_eval(obj_dict)
                         instance_id = shlex.split(get_regex[2])[0]
                         instance_id = instance_id.replace(",", "")
 
-                        # update the instance with the dictionary attributes
-                        for key, value in obj_dict.items():
-                            self.onecmd(f"{line} {instance_id} {key} {value}")
-
-                        # we are done with the line, reset it to empty
-                        line = ""
-                    else:
-                        # pass the rest of the arguments as is
-                        line += " "
-
-                        # try and preserve a list if it exists
-                        list_data = re.findall(r"\[.*\]", get_regex[2])
-                        if list_data:
-                            get_regex[2] = get_regex[2].replace(
-                                str(list_data[0]), ""
-                            )
-
-                        extra_args = shlex.split(get_regex[2])
-                        line += " ".join(extra_args).replace(",", "")
-                        line += f" {list_data or ''}"
+                        line += f" {instance_id} {obj_dict}"
+                        return line
                 except IndexError:
+                    pass
+
+                # try and preserve a list if it exists
+                if len(get_regex) >= 3:
+                    list_data = re.findall(r"\[.*\]", get_regex[2])
+                    if list_data:
+                        get_regex[2] = get_regex[2].replace(
+                            str(list_data[0]), ""
+                        )
+
+                try:
+                    extra_args = shlex.split(get_regex[2])
+                    line += " "
+                    line += " ".join(extra_args).replace(",", "")
+                    line += f" {list_data or ''}"
+                except (ValueError, IndexError):
                     pass
 
         return line.strip()
@@ -133,7 +130,7 @@ class HBNBCommand(cmd.Cmd):
                 and len(line.split()) > 1
             ):
                 print()
-        except ValueError:
+        except (ValueError, IndexError):
             self.onecmd(f"{line}")
             return ""
 
@@ -203,8 +200,7 @@ class HBNBCommand(cmd.Cmd):
         try:
             args = shlex.split(line)
         except ValueError:
-            self.default(line)
-            return False
+            args = ""
 
         def __is_valid_args_helper(args: str) -> bool:
             """A simple helper function for `__is_valid_args()`."""
@@ -223,7 +219,7 @@ class HBNBCommand(cmd.Cmd):
                     return False
 
             if check_attributes:
-                if len(args) < 3:
+                if len(re.findall(r"\{[^}]*$", line)) != 0 or len(args) < 3:
                     print("** attribute name missing **")
                     return False
 
@@ -342,11 +338,7 @@ class HBNBCommand(cmd.Cmd):
         if not self.__is_valid_args(line, check_class=True, check_id=True):
             return
 
-        try:
-            instance_class, instance_id = shlex.split(line)
-        except ValueError:
-            print("** too many arguments **")
-            return
+        instance_class, instance_id = shlex.split(line)
 
         instance = self.__search_instance(instance_class, instance_id)
         if instance:
@@ -426,21 +418,26 @@ class HBNBCommand(cmd.Cmd):
         instance = self.__search_instance(instance_class, instance_id)
 
         if instance:
-            if re.findall(r"\[.*\]", arg):
-                attr_val = re.findall(r"\[.*\]", arg)[0]
-            else:
+            try:
+                attr_val = re.findall(r"\{.*\}", arg)[0]
+            except IndexError:
                 attr_val = shlex.split(arg)[3]
 
             try:
-                # setting the value based on its default builtin type
-                instance.__dict__[attr_name] = literal_eval(attr_val)
+                # evaluating the value based on its default builtin type
+                attr_val = literal_eval(attr_val)
             except (ValueError, SyntaxError):
                 # well, looks like we'd have to save it as it was received
                 instance.__dict__[attr_name] = attr_val
+            else:
+                if isinstance(attr_val, dict):
+                    instance.__dict__.update(attr_val)
+                else:
+                    instance.__dict__[attr_name] = attr_val
 
             instance.save()
         else:
-            print(" ** no instance found **")
+            print("** no instance found **")
 
     @staticmethod
     def help_update() -> None:
