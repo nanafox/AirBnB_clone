@@ -542,6 +542,59 @@ class TestUpdateCommand(TestCase):
                 attr_name, models.storage.all()[instance_key].to_dict()
             )
 
+    def test_update_no_class_arg(self) -> None:
+        """Tests the `update` command without passing a class name."""
+        for _ in known_models:
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd("update")
+
+            # the `update` command prints nothing on success, confirm that
+            self.assertEqual(
+                result.getvalue().strip(), "** class name missing **"
+            )
+
+    def test_update_invalid_class_name(self) -> None:
+        """Tests the `update` command with a wrong class name."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"update {model.upper()}")
+
+            # the `update` command prints nothing on success, confirm that
+            self.assertEqual(
+                result.getvalue().strip(), "** class doesn't exist **"
+            )
+
+    def test_update_no_instance_id(self) -> None:
+        """Tests the `update` command with a no instance ID."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"update {model}")
+
+            # the `update` command prints nothing on success, confirm that
+            self.assertEqual(
+                result.getvalue().strip(), "** instance id missing **"
+            )
+
+    def test_update_no_attribute_name(self) -> None:
+        """Tests the `update` command with a no attribute name."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"update {model} 1234-1234-1234")
+
+            # the `update` command prints nothing on success, confirm that
+            self.assertEqual(
+                result.getvalue().strip(), "** attribute name missing **"
+            )
+
+    def test_update_no_attribute_value(self) -> None:
+        """Tests the `update` command with a no attribute value."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"update {model} 1234-1234-1234 first_name")
+
+            # the `update` command prints nothing on success, confirm that
+            self.assertEqual(result.getvalue().strip(), "** value missing **")
+
 
 class TestAllCommand(TestCase):
     """Tests the `all` command on all models."""
