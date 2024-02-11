@@ -200,7 +200,7 @@ class HBNBCommand(cmd.Cmd):
         try:
             args = shlex.split(line)
         except ValueError:
-            return False
+            args = ""
 
         def __is_valid_args_helper(args: str) -> bool:
             """A simple helper function for `__is_valid_args()`."""
@@ -338,11 +338,7 @@ class HBNBCommand(cmd.Cmd):
         if not self.__is_valid_args(line, check_class=True, check_id=True):
             return
 
-        try:
-            instance_class, instance_id = shlex.split(line)
-        except ValueError:
-            print("** too many arguments **")
-            return
+        instance_class, instance_id = shlex.split(line)
 
         instance = self.__search_instance(instance_class, instance_id)
         if instance:
