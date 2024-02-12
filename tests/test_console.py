@@ -548,7 +548,6 @@ class TestUpdateCommand(TestCase):
             with patch("sys.stdout", new=StringIO()) as result:
                 hbnb().onecmd("update")
 
-            # the `update` command prints nothing on success, confirm that
             self.assertEqual(
                 result.getvalue().strip(), "** class name missing **"
             )
@@ -559,7 +558,6 @@ class TestUpdateCommand(TestCase):
             with patch("sys.stdout", new=StringIO()) as result:
                 hbnb().onecmd(f"update {model.upper()}")
 
-            # the `update` command prints nothing on success, confirm that
             self.assertEqual(
                 result.getvalue().strip(), "** class doesn't exist **"
             )
@@ -570,7 +568,6 @@ class TestUpdateCommand(TestCase):
             with patch("sys.stdout", new=StringIO()) as result:
                 hbnb().onecmd(f"update {model}")
 
-            # the `update` command prints nothing on success, confirm that
             self.assertEqual(
                 result.getvalue().strip(), "** instance id missing **"
             )
@@ -581,7 +578,6 @@ class TestUpdateCommand(TestCase):
             with patch("sys.stdout", new=StringIO()) as result:
                 hbnb().onecmd(f"update {model} 1234-1234-1234")
 
-            # the `update` command prints nothing on success, confirm that
             self.assertEqual(
                 result.getvalue().strip(), "** attribute name missing **"
             )
@@ -592,8 +588,60 @@ class TestUpdateCommand(TestCase):
             with patch("sys.stdout", new=StringIO()) as result:
                 hbnb().onecmd(f"update {model} 1234-1234-1234 first_name")
 
-            # the `update` command prints nothing on success, confirm that
             self.assertEqual(result.getvalue().strip(), "** value missing **")
+
+    def test_update_no_instance_found(self) -> None:
+        """Tests the `update` command when an instance is not found."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(
+                    f"update {model} 1234-1234-1234 first_name 'John'"
+                )
+
+            self.assertEqual(
+                result.getvalue().strip(), "** no instance found **"
+            )
+
+    def test_create_update_one_attribute_ignore_extra(self) -> None:
+        """Creates an instance of each model, updates it with one attribute,
+        then checks that it happened. Also it checks to ensure extra args are
+        ignored."""
+        for model in known_models:
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(f"create {model}")
+
+            instance_id = instance.get_uuid(result)
+            instance_key = instance.get_key(model, instance_id)
+            attr_name_1, attr_value_1 = instance.get_random_attribute()
+            attr_name_2, attr_value_2 = "email", instance.get_email()
+
+            with patch("sys.stdout", new=StringIO()) as result:
+                hbnb().onecmd(
+                    f"update {model} {instance_id} "
+                    f"{attr_name_1} {attr_value_1} "
+                    f"{attr_name_2} {attr_value_2}"
+                )
+
+            # the `update` command prints nothing on success, confirm that
+            self.assertEqual(result.getvalue().strip(), "")
+
+            # now let's confirm that the instance really got updated only
+            # the `attr_name_1` and `attr_value_1` only
+            self.assertIn(
+                attr_name_1, models.storage.all()[instance_key].to_dict()
+            )
+
+            # confirm the value is really `attr_value_1`
+            self.assertEqual(
+                models.storage.all()[instance_key].to_dict()[attr_name_1],
+                attr_value_1,
+            )
+
+            # now let's confirm that the instance the extra args
+            # i.e., `attr_name_2` and `attr_value_2` were ignored
+            self.assertNotIn(
+                attr_name_2, models.storage.all()[instance_key].to_dict()
+            )
 
 
 class TestAllCommand(TestCase):
