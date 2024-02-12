@@ -267,16 +267,16 @@ class HBNBCommand(cmd.Cmd):
         print()
         return True
 
-    def do_create(self, line: str) -> None:
+    def do_create(self, class_name: str) -> None:
         """Creates a new instance of a model and saves it to a JSON file.
 
         Args:
-            line (str): The command line argument received.
+            class_name (str): The expected class name.
         """
-        if not self.__is_valid_args(line, check_class=True):
+        if not self.__is_valid_args(class_name, check_class=True):
             return
 
-        obj = self.__models[line]()
+        obj = self.__models[shlex.split(class_name)[0]]()
         obj.save()
         print(obj.id)
 
