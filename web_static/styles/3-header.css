@@ -2,10 +2,6 @@
 header {
     width: 100%;
     height: 70px;
-    background: #ffffff;
+    background: #ffffff no-repeat 20px url(../images/logo.png);
     border-bottom: 1px solid #cccccc;
-    background-image: url(../images/logo.png);
-    background-repeat: no-repeat;
-    background-position-x: 20px;
-    background-position-y: center;
 }
