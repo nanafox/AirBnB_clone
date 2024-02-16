@@ -2,6 +2,9 @@
 
 !/**/
 !*.py
+!*.html
+!*.css
+!*.js
 !.gitignore
 !README.md
 !AUTHORS
