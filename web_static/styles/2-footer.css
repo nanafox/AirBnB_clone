@@ -1,0 +1,15 @@
+/** 
+ * Make the background of the footer green and 
+ * center (vertically and horizontally) it's text
+*/
+footer {
+    width: 100%;
+    height: 60px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 60px;
+    left: 0;
+    bottom: 0;
+    position: fixed;
+    background: #00ff00;
+}

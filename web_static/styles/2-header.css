@@ -1,0 +1,6 @@
+/* Make the background of the header red */
+header {
+    width: 100%;
+    height: 60px;
+    background: #ff0000;
+}
