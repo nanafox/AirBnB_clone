@@ -1,0 +1,11 @@
+/* Make the background of the header white and add image */
+header {
+    width: 100%;
+    height: 70px;
+    background: #ffffff;
+    border-bottom: 1px solid #cccccc;
+    background-image: url(../images/logo.png);
+    background-repeat: no-repeat;
+    background-position-x: 20px;
+    background-position-y: center;
+}
