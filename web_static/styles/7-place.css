@@ -1,0 +1,32 @@
+/* Adjust the font-size for both h1 and h2 in the places section */
+.places h1,
+h2 {
+    font-size: 30px;
+}
+
+.places h1 {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.places h2 {
+    text-align: center;
+}
+
+.places li {
+    list-style-type: none;
+    display: inline-block;
+}
+
+.places article {
+    width: 390px;
+    padding: 20px;
+    margin: 20px;
+    border: 1px solid #ff5a5f;
+    border-radius: 4px;
+}
+
+/* Style the last list item so it appears centered */
+.places li:last-of-type {
+    padding-left: 210px;
+}
