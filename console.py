@@ -41,7 +41,7 @@ class HBNBCommand(cmd.Cmd):
         then calls the appropriate method to handle it.
 
         If the command `line` does not match a model-based syntax, then it is
-        ruled out an unknown command.
+        ruled out as an unknown command.
 
         Args:
             line (str): The command line received.
@@ -54,6 +54,11 @@ class HBNBCommand(cmd.Cmd):
 
     def __handle_model_based_cmd(self, line: str) -> str:
         """Handles the model-based command syntax.
+
+        Examples:
+            - `User.all()`
+            - `User.create()`
+            - `User.update(<id>, <attribute_name>, <attribute_value>)`
 
         Args:
             line (str): The command line received.
@@ -107,7 +112,7 @@ class HBNBCommand(cmd.Cmd):
     def precmd(self, line) -> str:
         """Modifies the command line received before it is interpreted.
 
-        The job of this method is two folds
+        The job of this method is in two folds
 
             - It performs a mini case-insensitivity for the 'EOF' string
             when received on the command line.
@@ -118,7 +123,8 @@ class HBNBCommand(cmd.Cmd):
             line (str): The command line to modify
 
         Returns:
-            str: The modified command if touched, else it returned as received.
+            str: The modified command if touched, else it is returned
+            as received.
         """
         if line and line == "EOF":
             return line.lower()
@@ -156,7 +162,7 @@ class HBNBCommand(cmd.Cmd):
         return stop
 
     def completedefault(self, *text) -> "list[str]":
-        """Performs the name completion for model names.
+        """Performs tab completion for model names.
 
         Returns:
             list[str]: The list of model names.
