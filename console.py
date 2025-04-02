@@ -7,6 +7,7 @@ import os
 import cmd
 import shlex
 from ast import literal_eval
+from typing import List
 from models import storage
 from models.user import User
 from models.city import City
@@ -67,48 +68,38 @@ class HBNBCommand(cmd.Cmd):
         Returns:
             str: The updated line for further processing.
         """
-        get_regex = list(re.match(r"(\w+)\.(\w+)\((.*)\)", line).groups())
+        match = re.match(r"(\w+)\.(\w+)\((.*)\)", line.strip())
+        if not match:
+            return line.strip()
 
-        # get rid of empty lines in the returned pattern
-        if get_regex[-1] == "":
-            get_regex.pop()
+        class_name, user_cmd, args = match.groups()
+        line = f"{user_cmd} {class_name}"
 
-        if get_regex:
-            if len(get_regex) >= 2:
-                class_name, user_cmd = get_regex[0], get_regex[1]
-                line = f"{user_cmd} {class_name}"
+        if not args:
+            return line
 
-                try:
-                    obj_dict = re.findall(r"\{.*?\}", get_regex[2])[0]
+        try:
+            # Handle dictionary argument (for update commands)
+            obj_dict_match = re.search(r"\{.*?\}", args)
+            if user_cmd == "update" and obj_dict_match:
+                obj_dict = literal_eval(obj_dict_match.group())
+                instance_id = shlex.split(args)[0].replace(",", "")
+                return f"{line} {instance_id} {obj_dict}"
+        except (IndexError, ValueError, SyntaxError):
+            pass
 
-                    if user_cmd == "update" and obj_dict:
+        # Extract list arguments (if present)
+        list_data_match = re.search(r"\[.*\]", args)
+        list_data = list_data_match.group() if list_data_match else ""
+        if list_data:
+            args = args.replace(list_data, "")
 
-                        obj_dict = literal_eval(obj_dict)
-                        instance_id = shlex.split(get_regex[2])[0]
-                        instance_id = instance_id.replace(",", "")
+        try:
+            extra_args = " ".join(shlex.split(args)).replace(",", "")
+        except (ValueError, IndexError):
+            extra_args = ""
 
-                        line += f" {instance_id} {obj_dict}"
-                        return line
-                except IndexError:
-                    pass
-
-                # try and preserve a list if it exists
-                if len(get_regex) >= 3:
-                    list_data = re.findall(r"\[.*\]", get_regex[2])
-                    if list_data:
-                        get_regex[2] = get_regex[2].replace(
-                            str(list_data[0]), ""
-                        )
-
-                try:
-                    extra_args = shlex.split(get_regex[2])
-                    line += " "
-                    line += " ".join(extra_args).replace(",", "")
-                    line += f" {list_data or ''}"
-                except (ValueError, IndexError):
-                    pass
-
-        return line.strip()
+        return f"{line} {extra_args} {list_data}".strip()
 
     def precmd(self, line) -> str:
         """Modifies the command line received before it is interpreted.
@@ -127,15 +118,14 @@ class HBNBCommand(cmd.Cmd):
             str: The modified command if touched, else it is returned
             as received.
         """
-        if line and line == "EOF":
+        if not line:
+            return line
+
+        if line == "EOF":
             return line.lower()
 
         try:
-            if (
-                line
-                and shlex.split(line)[0] in ["help", "?"]
-                and len(line.split()) > 1
-            ):
+            if shlex.split(line)[0] in ["help", "?"] and len(line.split()) > 1:
                 print()
         except (ValueError, IndexError):
             self.onecmd(f"{line}")
