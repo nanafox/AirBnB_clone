@@ -141,7 +141,7 @@ class HBNBCommand(cmd.Cmd):
             line (str): The command line received.
 
         Returns:
-            bool: True if the console should exit, else False.
+            bool: True if the console should exit, False otherwise.
         """
         if (
             line
@@ -152,11 +152,11 @@ class HBNBCommand(cmd.Cmd):
 
         return stop
 
-    def completedefault(self, *text) -> "list[str]":
+    def completedefault(self, *text) -> List[str]:
         """Performs tab completion for model names.
 
         Returns:
-            list[str]: The list of model names.
+            List[str]: The list of model names.
         """
         if not text:
             completions = list(self.__models.keys())[:]
@@ -199,7 +199,7 @@ class HBNBCommand(cmd.Cmd):
         except ValueError:
             args = ""
 
-        def __is_valid_args_helper(args: str) -> bool:
+        def __is_valid_args_helper(args: List[str] | str) -> bool:
             """A simple helper function for `__is_valid_args()`."""
             if check_class:
                 if not args:
@@ -325,7 +325,7 @@ class HBNBCommand(cmd.Cmd):
         )
 
     def do_destroy(self, line) -> None:
-        """Deletes an instance base on the class name and id
+        """Deletes an instance base on the class name and id.
 
         Args:
             line (str): The command line argument received.
