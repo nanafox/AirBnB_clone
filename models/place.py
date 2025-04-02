@@ -2,7 +2,6 @@
 
 """This module defines the Place model."""
 
-
 from models.base_model import BaseModel
 
 

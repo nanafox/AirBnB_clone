@@ -2,7 +2,6 @@
 
 """This module tests the console program `HBNBCommand`."""
 
-
 import os
 import inspect
 from io import StringIO

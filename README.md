@@ -2,12 +2,14 @@
 
 ## Project background
 
-The **AirBnB clone - The console** project is the first step in building a fullstack web application.
+The **AirBnB clone - The console** project is the first step in building a
+fullstack web application.
 It focuses on building models that will be used by future projects.
 
 ## The command interpreter
 
-The job of the command interpreter is to help manage the objects used in the project. It would do the
+The job of the command interpreter is to help manage the objects used in
+the project. It would do the
 following:
 
 - Creates a new object (e.g. a new User or a new Place)

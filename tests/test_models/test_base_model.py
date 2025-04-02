@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""Tests the BaseModel class"""
+"""Tests the BaseModel class."""
 
 import os
 import unittest
@@ -13,8 +13,8 @@ JSON_FILE_PATH = "file_storage.json"
 
 
 class TestEverythingBaseModelDocumentation(unittest.TestCase):
-    """Tests the documentation for modules, classes and methods for
-    BaseModel and anything else that inherits from it."""
+    """Tests the documentation for modules, classes and methods for BaseModel
+    and anything else that inherits from it."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -97,20 +97,16 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(type(self.base1.id), str)
 
     def test_instance_change_updated_at(self) -> None:
-        """
-        Tests whether the `updated_at` attribute is updated when a change
-        occurs to the instance.
-        """
+        """Tests whether the `updated_at` attribute is updated when a change
+        occurs to the instance."""
         prev_updated_at = self.base1.updated_at
         self.base1.name = "My New Class"
 
         self.assertNotEqual(prev_updated_at, self.base1.updated_at)
 
     def test_same_datetime_on_instantiation(self):
-        """
-        Tests for the same `created_at` and `updated_at` time values when an
-        instance is initialized for the first time.
-        """
+        """Tests for the same `created_at` and `updated_at` time values when an
+        instance is initialized for the first time."""
         self.assertEqual(self.base1.created_at, self.base1.updated_at)
 
     def test_iso_format(self) -> None:
@@ -125,11 +121,11 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(base2_dict["created_at"], expected_iso_format_2)
 
     def test_nonexistent_attribute(self) -> None:
-        """Tests for non-existent attribute"""
+        """Tests for non-existent attribute."""
         self.assertFalse(hasattr(self.base1, "invalid_id"))
 
     def test_nonexistent_method(self) -> None:
-        """Tests for non-existent method"""
+        """Tests for non-existent method."""
         self.assertFalse(hasattr(self.base1, "get_base()"))
 
     def test_update_to_datetime_year(self) -> None:
@@ -187,45 +183,43 @@ class TestInstantiationFromDict(unittest.TestCase):
         self.assertEqual(new_base.id, self.base2.id)
 
     def test_same_creation_datetime_from_dict(self) -> None:
-        """Tests for the same creation dates when instantiated from
-        a dictionary.
-        """
+        """Tests for the same creation dates when instantiated from a
+        dictionary."""
         new_base = BaseModel(**self.base1.to_dict())
 
         self.assertEqual(self.base1.created_at, new_base.created_at)
 
     def test_same_updated_datetime_from_dict(self) -> None:
-        """Tests for the same `updated_at` dates when instantiated from
-        a dictionary.
-        """
+        """Tests for the same `updated_at` dates when instantiated from a
+        dictionary."""
         new_base = BaseModel(**self.base1.to_dict())
 
         self.assertEqual(new_base.updated_at, self.base1.updated_at)
 
     def test_updated_at_type_from_dict(self) -> None:
-        """Tests the data type of the `updated_at` instance attribute
-        after instantiating from a dictionary.
-        """
+        """Tests the data type of the `updated_at` instance attribute after
+        instantiating from a dictionary."""
         new_base = BaseModel(**self.base1.to_dict())
 
         self.assertEqual(type(new_base.updated_at), datetime.datetime)
 
     def test_created_at_type_from_dict(self) -> None:
-        """Tests the data type of the `created_at` instance attribute
-        after instantiating from a dictionary.
-        """
+        """Tests the data type of the `created_at` instance attribute after
+        instantiating from a dictionary."""
         new_base = BaseModel(**self.base1.to_dict())
 
         self.assertEqual(type(new_base.created_at), datetime.datetime)
 
     def test_arg_passed_to_dict(self) -> None:
         """Tests passing an argument to the `to_dict()` method.
-        Expects TypeError."""
+
+        Expects TypeError.
+        """
         with self.assertRaises(TypeError):
             self.base1.to_dict(self.base1)
 
     def test_isoformat_string_date(self) -> None:
-        """Tests to ensure ISO dates are strings in the dictionary"""
+        """Tests to ensure ISO dates are strings in the dictionary."""
         self.assertIsInstance(self.base1.to_dict()["updated_at"], str)
         self.assertIsInstance(self.base1.to_dict()["created_at"], str)
 
@@ -294,6 +288,9 @@ class TestSaveMethod(unittest.TestCase):
                 self.assertTrue(issubclass(obj.__class__, BaseModel))
 
     def test_arg_passed_to_save(self) -> None:
-        """Tests passing an argument to the save method. Expects TypeError."""
+        """Tests passing an argument to the save method.
+
+        Expects TypeError.
+        """
         with self.assertRaises(TypeError):
             self.base1.save(self.base1)

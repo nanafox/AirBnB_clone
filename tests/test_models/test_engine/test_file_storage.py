@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 
-
 """Tests the FileStorage engine."""
-
 
 import os
 import json
@@ -87,7 +85,8 @@ class TestFileStorageAllMethod(unittest.TestCase):
         )
 
     def test_key_name_in_objects_dict_diff_two_objects(self) -> None:
-        """Ensure key names are correct for two objects of different classes"""
+        """Ensure key names are correct for two objects of different
+        classes."""
         base = BaseModel()
         city = City()
 
@@ -103,7 +102,7 @@ class TestFileStorageNewMethod(unittest.TestCase):
     """Tests the `new()` method of the FileStorage engine."""
 
     def test_invalid_new_list_object(self) -> None:
-        """Tests invalid objects passed to the `new()` method"""
+        """Tests invalid objects passed to the `new()` method."""
         new_data = [1, 23, 4]
 
         with self.assertRaisesRegex(AttributeError, "no attribute 'id'"):
@@ -236,7 +235,7 @@ class TestFileStorageReloadMethod(unittest.TestCase):
             storage.reload(BaseModel)
 
     def test_invalid_json_file_reload(self) -> None:
-        """Tests a reload on an invalid JSON file format"""
+        """Tests a reload with an invalid JSON file format."""
         with open(JSON_FILE_PATH, "w", encoding="utf-8") as json_file:
             json.dump({"BaseModel": [1, 2, 4]}, json_file)
 
