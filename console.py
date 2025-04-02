@@ -31,8 +31,9 @@ class HBNBCommand(cmd.Cmd):
         "Review": Review,
     }
 
-    def emptyline(self) -> None:
+    def emptyline(self) -> bool:
         """Ensures empty command lines are handled properly."""
+        return False
 
     def default(self, line: str) -> None:
         """Handles unknown commands and model-based commands.
